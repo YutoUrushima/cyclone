@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 func main() {
-	fmt.Println("Hi!")
+	godotenv.Load()
+	req, err := http.NewRequest("POST", os.Getenv("SLACK_URL"), nil)
+	fmt.Printf("req: %v, err: %v", req, err)
 }
