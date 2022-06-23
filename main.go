@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/joho/godotenv"
 )
 
@@ -14,7 +15,7 @@ type RequestBody struct {
 	text    string
 }
 
-func main() {
+func HandleRequest() {
 	godotenv.Load()
 	// requestBody := &RequestBody{
 	// 	channel: os.Getenv("CHANNEL_ID"),
@@ -50,4 +51,8 @@ func main() {
 	}
 
 	fmt.Printf("%#v", string(resArray))
+}
+
+func main() {
+	lambda.Start(HandleRequest)
 }
