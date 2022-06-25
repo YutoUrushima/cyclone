@@ -185,7 +185,7 @@ func HandleLambdaEvent(eventPayload EventPayload) {
 
 	params := req.URL.Query()
 	params.Add("channel", os.Getenv("CHANNEL_ID"))
-	params.Add("text", "info:"+eventPayload.Ref)
+	params.Add("text", "Info: "+eventPayload.Ref)
 	req.URL.RawQuery = params.Encode()
 
 	fmt.Printf("request -> %v\n", req)
