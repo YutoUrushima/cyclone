@@ -12,7 +12,6 @@ import (
 )
 
 type EventPayload struct {
-	Action     string        `json:"action"`
 	Ref        string        `json:"ref"`
 	Before     string        `json:"before"`
 	After      string        `json:"after"`
@@ -188,7 +187,7 @@ func HandleLambdaEvent(eventPayload EventPayload) {
 
 	params := req.URL.Query()
 	params.Add("channel", os.Getenv("CHANNEL_ID"))
-	params.Add("text", eventPayload.Action)
+	params.Add("text", eventPayload.Ref)
 	req.URL.RawQuery = params.Encode()
 
 	fmt.Printf("request -> %v\n", req)
