@@ -183,8 +183,6 @@ func HandleLambdaEvent(eventPayload EventPayload) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("BEARER_TOKEN"))
 
-	fmt.Printf("data -> %v\n", eventPayload)
-
 	params := req.URL.Query()
 	params.Add("channel", os.Getenv("CHANNEL_ID"))
 	params.Add("text", eventPayload.Ref)
