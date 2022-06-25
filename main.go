@@ -34,7 +34,7 @@ func HandleRequest() {
 
 	params := req.URL.Query()
 	params.Add("channel", os.Getenv("CHANNEL_ID"))
-	params.Add("text", "Hello,world2")
+	params.Add("text", "Event happened!")
 	req.URL.RawQuery = params.Encode()
 
 	fmt.Printf("request -> %v\n", req)
