@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/joho/godotenv"
 )
@@ -193,7 +195,7 @@ type EventPayload struct {
 
 // TODO: pullrequest
 
-func HandleLambdaEvent(eventPayload EventPayload) {
+func HandleLambdaEvent(request events.LambdaFunctionURLRequest) {
 	godotenv.Load()
 	// requestBody := &RequestBody{
 	// 	channel: os.Getenv("CHANNEL_ID"),
@@ -210,12 +212,20 @@ func HandleLambdaEvent(eventPayload EventPayload) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("BEARER_TOKEN"))
 
-	fmt.Printf("TYPE -> %T\n", eventPayload)
-	fmt.Printf("eventPayload -> %v\n", eventPayload)
+	dataBytes := ([]byte)(request.Body)
+	data := new(EventPayload)
+
+	fmt.Printf("request.Body -> %v\n", request.Body)
+	fmt.Printf("dataBytes -> %v\n", dataBytes)
+	fmt.Printf("data -> %v\n", data)
+
+	if err := json.Unmarshal(dataBytes, data); err != nil {
+		panic("Error!")
+	}
 
 	params := req.URL.Query()
 	params.Add("channel", os.Getenv("CHANNEL_ID"))
-	params.Add("text", "Info: "+eventPayload.Ref)
+	params.Add("text", "Info: "+data.Ref)
 	req.URL.RawQuery = params.Encode()
 
 	fmt.Printf("request -> %v\n", req)
