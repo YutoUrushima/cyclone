@@ -687,7 +687,7 @@ func HandleLambdaEvent(request events.LambdaFunctionURLRequest) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("BEARER_TOKEN"))
 
-	eventType := request.Headers["X-GitHub-Event"]
+	eventType := request.Headers["x-github-event"]
 	fmt.Printf("request.Headers -> %v\n", request.Headers)
 	fmt.Printf("eventType -> %v\n", eventType)
 
