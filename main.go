@@ -692,19 +692,21 @@ func HandleLambdaEvent(request events.LambdaFunctionURLRequest) {
 	fmt.Printf("eventType -> %v\n", eventType)
 
 	dataBytes := ([]byte)(request.Body)
-	data := new(PushEventPayload)
-
-	fmt.Printf("request.Body -> %v\n", request.Body)
-	fmt.Printf("dataBytes -> %v\n", dataBytes)
-	fmt.Printf("data -> %v\n", data)
-
-	if err := json.Unmarshal(dataBytes, data); err != nil {
-		panic("Error!")
-	}
-
 	params := req.URL.Query()
 	params.Add("channel", os.Getenv("CHANNEL_ID"))
-	params.Add("text", "New commit was pushed to "+strings.Split(data.Ref, "/")[2]+" by "+data.Pusher.Name+"\n"+data.Commits[0].URL)
+	if eventType == "push" {
+		pushData := new(PushEventPayload)
+		if err := json.Unmarshal(dataBytes, pushData); err != nil {
+			panic("Error!")
+		}
+		params.Add("text", "New commit was pushed to "+strings.Split(pushData.Ref, "/")[2]+" by "+pushData.Pusher.Name+"\n"+pushData.Commits[0].URL)
+	} else {
+		pullRequestData := new(PullRequestEventPayload)
+		if err := json.Unmarshal(dataBytes, pullRequestData); err != nil {
+			panic("Error!")
+		}
+		params.Add("text", "This action was happened: "+pullRequestData.Action+" by "+pullRequestData.Sender.Login+"\n"+pullRequestData.PullRequest.URL)
+	}
 	req.URL.RawQuery = params.Encode()
 
 	fmt.Printf("request -> %v\n", req)
