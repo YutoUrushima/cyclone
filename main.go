@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -225,7 +226,7 @@ func HandleLambdaEvent(request events.LambdaFunctionURLRequest) {
 
 	params := req.URL.Query()
 	params.Add("channel", os.Getenv("CHANNEL_ID"))
-	params.Add("text", "Info: "+data.Ref)
+	params.Add("text", "New commit was pushed to "+strings.Split(data.Ref, "/")[2]+" by "+data.Pusher.Name+"\n"+data.Commits[0].URL)
 	req.URL.RawQuery = params.Encode()
 
 	fmt.Printf("request -> %v\n", req)
