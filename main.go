@@ -167,6 +167,8 @@ type EventPayload struct {
 	} `json:"sender"`
 }
 
+// https://webhook.site/63ad6768-6c38-4e58-9c7c-15f528554e94
+
 // TODO: pullrequest
 
 func HandleLambdaEvent(eventPayload EventPayload) {
@@ -187,7 +189,7 @@ func HandleLambdaEvent(eventPayload EventPayload) {
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("BEARER_TOKEN"))
 
 	fmt.Printf("TYPE -> %T\n", eventPayload)
-	fmt.Printf("any -> %v", eventPayload.Ref)
+	fmt.Printf("any -> %v\n", eventPayload.Ref)
 
 	params := req.URL.Query()
 	params.Add("channel", os.Getenv("CHANNEL_ID"))
