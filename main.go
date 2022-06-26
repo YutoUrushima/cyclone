@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// push
 type EventPayload struct {
 	Ref        string        `json:"ref"`
 	Before     string        `json:"before"`
@@ -166,6 +167,8 @@ type EventPayload struct {
 	} `json:"sender"`
 }
 
+// TODO: pullrequest
+
 func HandleLambdaEvent(eventPayload EventPayload) {
 	godotenv.Load()
 	// requestBody := &RequestBody{
@@ -182,6 +185,8 @@ func HandleLambdaEvent(eventPayload EventPayload) {
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("BEARER_TOKEN"))
+
+	fmt.Printf("TYPE -> %T\n", eventPayload)
 
 	params := req.URL.Query()
 	params.Add("channel", os.Getenv("CHANNEL_ID"))
