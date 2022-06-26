@@ -15,7 +15,7 @@ import (
 )
 
 // push
-type EventPayload struct {
+type PushEventPayload struct {
 	Ref        string `json:"ref"`
 	Before     string `json:"before"`
 	After      string `json:"after"`
@@ -214,7 +214,7 @@ func HandleLambdaEvent(request events.LambdaFunctionURLRequest) {
 	req.Header.Set("Authorization", "Bearer "+os.Getenv("BEARER_TOKEN"))
 
 	dataBytes := ([]byte)(request.Body)
-	data := new(EventPayload)
+	data := new(PushEventPayload)
 
 	fmt.Printf("request.Body -> %v\n", request.Body)
 	fmt.Printf("dataBytes -> %v\n", dataBytes)
