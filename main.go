@@ -692,7 +692,7 @@ func Handler(request events.LambdaFunctionURLRequest) {
 		if err := json.Unmarshal(githubPayloadBytes, pullRequestData); err != nil {
 			panic("Error: Can't unmarshal pullRequest json data.")
 		}
-		slackParams.Add("text", "This action was happened: `"+pullRequestData.Action+"` by `"+pullRequestData.Sender.Login+"`\n"+pullRequestData.PullRequest.URL)
+		slackParams.Add("text", "This action was happened: `"+pullRequestData.Action+"` by `"+pullRequestData.Sender.Login+"`\n"+pullRequestData.PullRequest.HTMLURL)
 	}
 	slackRequest.URL.RawQuery = slackParams.Encode()
 
