@@ -11,10 +11,9 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/joho/godotenv"
 )
 
-// push
+// Push Struct
 type PushEventPayload struct {
 	Ref        string `json:"ref"`
 	Before     string `json:"before"`
@@ -194,7 +193,7 @@ type PushEventPayload struct {
 	} `json:"head_commit"`
 }
 
-// TODO: pullrequest
+// PullRequest Struct
 type PullRequestEventPayload struct {
 	Action      string `json:"action"`
 	Number      int    `json:"number"`
@@ -670,61 +669,49 @@ type PullRequestEventPayload struct {
 	} `json:"sender"`
 }
 
-func HandleLambdaEvent(request events.LambdaFunctionURLRequest) {
-	godotenv.Load()
-	// requestBody := &RequestBody{
-	// 	channel: os.Getenv("CHANNEL_ID"),
-	// 	text:    "Hello world",
-	// }
-	// jsonString, err := json.Marshal(requestBody)
-	// if err != nil {
-	// 	panic("Error")
-	// }
-	req, err := http.NewRequest("POST", os.Getenv("SLACK_URL"), nil)
+func Handler(request events.LambdaFunctionURLRequest) {
+	// httpリクエストの作成
+	slackRequest, err := http.NewRequest("POST", os.Getenv("SLACK_URL"), nil)
 	if err != nil {
-		panic(("Error"))
+		panic("Error: Can't make NewHttpRequest.")
 	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Authorization", "Bearer "+os.Getenv("BEARER_TOKEN"))
-
-	eventType := request.Headers["x-github-event"]
-	fmt.Printf("request.Headers -> %v\n", request.Headers)
-	fmt.Printf("eventType -> %v\n", eventType)
-
-	dataBytes := ([]byte)(request.Body)
-	params := req.URL.Query()
-	params.Add("channel", os.Getenv("CHANNEL_ID"))
-	if eventType == "push" {
+	slackRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	slackRequest.Header.Set("Authorization", "Bearer "+os.Getenv("BEARER_TOKEN"))
+	githubEventType := request.Headers["x-github-event"]
+	githubPayloadBytes := ([]byte)(request.Body)
+	slackParams := slackRequest.URL.Query()
+	slackParams.Add("channel", os.Getenv("CHANNEL_ID"))
+	if githubEventType == "push" {
 		pushData := new(PushEventPayload)
-		if err := json.Unmarshal(dataBytes, pushData); err != nil {
-			panic("Error!")
+		if err := json.Unmarshal(githubPayloadBytes, pushData); err != nil {
+			panic("Error: Can't unmarshal push json data.")
 		}
-		params.Add("text", "New commit was pushed to "+strings.Split(pushData.Ref, "/")[2]+" by "+pushData.Pusher.Name+"\n"+pushData.Commits[0].URL)
+		slackParams.Add("text", "New commit was pushed to `"+strings.Split(pushData.Ref, "/")[2]+"` by `"+pushData.Pusher.Name+"`\n"+pushData.Commits[0].URL)
 	} else {
 		pullRequestData := new(PullRequestEventPayload)
-		if err := json.Unmarshal(dataBytes, pullRequestData); err != nil {
-			panic("Error!")
+		if err := json.Unmarshal(githubPayloadBytes, pullRequestData); err != nil {
+			panic("Error: Can't unmarshal pullRequest json data.")
 		}
-		params.Add("text", "This action was happened: "+pullRequestData.Action+" by "+pullRequestData.Sender.Login+"\n"+pullRequestData.PullRequest.URL)
+		slackParams.Add("text", "This action was happened: `"+pullRequestData.Action+"` by `"+pullRequestData.Sender.Login+"`\n"+pullRequestData.PullRequest.URL)
 	}
-	req.URL.RawQuery = params.Encode()
+	slackRequest.URL.RawQuery = slackParams.Encode()
 
-	fmt.Printf("request -> %v\n", req)
-	client := new(http.Client)
-	res, err := client.Do(req)
+	// httpリクエストの実行
+	httpClient := new(http.Client)
+	slackResponse, err := httpClient.Do(slackRequest)
 	if err != nil {
-		panic("Error")
+		panic("Error: httpRequest stopped by Error.")
 	}
-	defer res.Body.Close()
+	defer slackResponse.Body.Close()
 
-	resArray, err := ioutil.ReadAll(res.Body)
+	// httpリクエストの結果
+	responseArray, err := ioutil.ReadAll(slackResponse.Body)
 	if err != nil {
-		panic("Error")
+		panic("Error: Can't get response.")
 	}
-
-	fmt.Printf("%#v", string(resArray))
+	fmt.Printf("%v", string(responseArray))
 }
 
 func main() {
-	lambda.Start(HandleLambdaEvent)
+	lambda.Start(Handler)
 }
